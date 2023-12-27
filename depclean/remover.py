@@ -3,7 +3,7 @@ import shutil
 
 from .progress import Progress, IndefiniteLoadingBar
 
-def sizeof_fmt(num: int, suffix="B"):
+def sizeof_fmt(num: int | float, suffix: str = "B") -> str:
     for unit in ("", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"):
         if abs(num) < 1024.0:
             return f"{num:3.1f}{unit}{suffix}"
@@ -15,20 +15,20 @@ class Remover:
     def __init__(self, root_path: str = ".", auto_prune: bool = False):
         self.auto_prune = auto_prune
         self.root_path = root_path
-        self.paths = []
+        self.paths: list[str] = []
 
-    def map_all_paths(self):
+    def map_all_paths(self) -> None:
         bar = IndefiniteLoadingBar()
         bar.start()
-        for path in os.walk(self.root_path):
-            path = path[0]
+        for __path in os.walk(self.root_path):
+            path = __path[0]
             if ("venv" in path or "node_modules" in path) and os.path.isdir(path):
                 self.paths.append(path)
         bar.end()
         if self.auto_prune:
             self.remove()
 
-    def remove(self):
+    def remove(self) -> None:
         sizes = []
         if not self.paths: return
         progress = Progress()
@@ -47,7 +47,7 @@ class Remover:
         progress.end()
         print(f"Freed: {size}")
 
-    def get_size(self, start_path: str):
+    def get_size(self, start_path: str) -> int:
         total_size = 0
         for dirpath, _, filenames in os.walk(start_path):
             for f in filenames:
